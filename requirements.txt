@@ -1,0 +1,22 @@
+streamlit
+streamlit-folium
+folium
+geopandas
+duckdb
+rasterio
+plotly
+eo-learn
+google-api-python-client
+earthengine-api
+numpy
+pandas
+matplotlib
+scikit-image
+scikit-learn
+torch
+torchvision
+opencv-python
+pillow
+requests
+segment-anything @ git+https://github.com/facebookresearch/segment-anything.git
+# groundingdino @ git+https://github.com/IDEA-Research/GroundingDINO.git 

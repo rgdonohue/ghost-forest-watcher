@@ -1,0 +1,21 @@
+[server]
+# Disable file watcher to prevent PyTorch-Streamlit conflicts
+fileWatcherType = "none"
+runOnSave = false
+
+# Server configuration
+headless = false
+port = 8501
+address = "0.0.0.0"
+
+[browser]
+# Browser configuration
+gatherUsageStats = false
+serverAddress = "localhost"
+
+[theme]
+# Theme configuration
+primaryColor = "#2E8B57"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F8F0"
+textColor = "#262730" 

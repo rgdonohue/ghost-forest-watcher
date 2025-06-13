@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+venv/
+env/
+.env
+.venv
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache
+
+# Documentation builds
+docs/_build/
+site/
+
+# Data and Models (Large files)
+/data/
+/models/
+/outputs/
+*.tif
+*.tiff
+*.shp
+*.dbf
+*.prj
+*.cpg
+*.geojson
+*.csv
+*.npz
+*.pt
+*.pth
+*.pkl
+*.h5
+*.hdf5
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS and System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and configuration
+.python-version
+config.ini
+settings.json
+
+# Test artifacts
+test_*.png
+test_*.jpg
+*_test.py~
+
