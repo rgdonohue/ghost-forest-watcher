@@ -130,7 +130,7 @@ streamlit run ghost_forest_watcher/app.py
 
 ### **Example Output**
 
-![Forest Die-off Analysis Results](outputs/forest_analysis_results.png)
+![Forest Die-off Analysis Results](docs/images/forest_analysis_results.png)
 
 ## Contributing
 
