@@ -54,7 +54,7 @@ Western Colorado's forests are increasingly threatened by drought, bark beetle i
 
 ## 🚀 Quick Start
 
-### Option 1: Standard Installation
+### Option 1: Simple Launch (Recommended)
 ```bash
 # 1. Clone and setup
 git clone <repo-url>
@@ -66,19 +66,28 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # 3. Run the application
-streamlit run app.py
+python main.py
+# or: make run
 ```
 
-### Option 2: With PyTorch Compatibility (Recommended)
+### Option 2: Development Setup
 ```bash
-# Use the custom launcher to avoid PyTorch-Streamlit conflicts
-python run_app.py
+# Install with development dependencies
+make dev-install
+
+# Run with various options
+python main.py --port 8502        # Custom port
+python main.py --safe             # Safe mode (no AI)
+python main.py --test             # Run tests
 ```
 
-### Option 3: Safe Mode (Testing)
+### Option 3: Advanced Usage
 ```bash
-# Run without AI components for testing
-streamlit run app_safe.py
+# Using the custom launcher script
+python scripts/run_app.py
+
+# Direct Streamlit execution
+streamlit run ghost_forest_watcher/app.py
 ```
 
 ### 🌐 Access the Application

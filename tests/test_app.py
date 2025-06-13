@@ -9,12 +9,12 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-# Add src to path for imports
-sys.path.append('src')
+# Add ghost_forest_watcher to path for imports
+sys.path.append('..')
 
-# Import modules to test
-from data_manager import GhostForestDataManager
-from sam_processor import ForestSAMProcessor
+# Import modules to test  
+from ghost_forest_watcher.src.data_manager import GhostForestDataManager
+from ghost_forest_watcher.src.sam_processor import ForestSAMProcessor
 
 
 class TestGhostForestDataManager(unittest.TestCase):

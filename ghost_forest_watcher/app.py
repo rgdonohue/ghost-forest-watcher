@@ -22,14 +22,11 @@ from streamlit_folium import st_folium
 import folium
 import io
 
-# Add src to path for imports
-sys.path.append('src')
-
 # Import our custom modules with error handling
 try:
-    from data_manager import GhostForestDataManager
-    from sam_processor import ForestSAMProcessor
-    from streamlit_pages import (
+    from .src.data_manager import GhostForestDataManager
+    from .src.sam_processor import ForestSAMProcessor
+    from .src.streamlit_pages import (
         show_map_page, show_analysis_page, show_explorer_page, 
         show_export_page, show_about_page
     )

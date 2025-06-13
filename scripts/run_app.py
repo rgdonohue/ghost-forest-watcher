@@ -33,7 +33,7 @@ def run_streamlit():
     
     # Default arguments
     args = [
-        'streamlit', 'run', 'app.py',
+        'streamlit', 'run', 'ghost_forest_watcher/app.py',
         '--server.headless', 'false',
         '--server.port', '8501',
         '--server.address', '0.0.0.0',
