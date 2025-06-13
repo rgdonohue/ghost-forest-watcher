@@ -119,6 +119,10 @@ streamlit run app_safe.py
 - **Real-time Processing**: Cached analysis for fast response times
 - **Export Tools**: Multiple format options for research and reporting
 
+### **Example Output**
+
+![Forest Die-off Analysis Results](outputs/forest_analysis_results.png)
+
 ## Contributing
 
 Contributions are welcome! Please:
