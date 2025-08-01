@@ -20,7 +20,7 @@ from PIL import Image
 import io
 
 # Import our SAM processor
-from sam_processor import ForestSAMProcessor
+from .sam_processor import ForestSAMProcessor
 
 class GhostForestDataManager:
     """Centralized data management for the Ghost Forest Watcher app"""
