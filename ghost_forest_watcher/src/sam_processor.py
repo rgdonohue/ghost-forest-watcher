@@ -35,28 +35,18 @@ class ForestSAMProcessor:
             model_type: SAM model type ('vit_b', 'vit_l', 'vit_h')
             device: Device to run on ('cuda', 'cpu', or 'auto')
         """
-        if not SAM_AVAILABLE:
-            logger.warning("segment_anything is not installed")
-            self.sam = None
-            self.predictor = None
-            return
-            
-        try:
-            self.model_type = model_type
-            self.device = self._get_device(device)
-            self.sam = None
-            self.predictor = None
-            
-            # Model checkpoint URLs
-            self.model_urls = {
-                "vit_b": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth",
-                "vit_l": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth", 
-                "vit_h": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
-            }
-        except Exception as e:
-            logger.error(f"Error initializing SAM processor: {e}")
-            self.sam = None
-            self.predictor = None
+        self.model_type = model_type
+        self.device = self._get_device(device)
+        self.sam = None
+        self.predictor = None
+        self.sam_available = SAM_AVAILABLE
+
+        # Model checkpoint URLs
+        self.model_urls = {
+            "vit_b": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth",
+            "vit_l": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth", 
+            "vit_h": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
+        }
         
     def _get_device(self, device: str) -> str:
         """Determine the best device to use"""
@@ -79,21 +69,31 @@ class ForestSAMProcessor:
         Returns:
             Path to the model checkpoint
         """
+        if not self.sam_available:
+            raise ImportError(
+                "segment_anything is not installed. Install extras: pip install '.[sam]' or install segment-anything."
+            )
+
         models_dir.mkdir(exist_ok=True)
         checkpoint_path = models_dir / f"sam_{self.model_type}.pth"
         
         if not checkpoint_path.exists():
-            import requests
-            url = self.model_urls[self.model_type]
-            logger.info(f"Downloading SAM {self.model_type} model...")
-            
-            response = requests.get(url, stream=True)
-            response.raise_for_status()
-            
-            with open(checkpoint_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            logger.info(f"Model downloaded to {checkpoint_path}")
+            # Try to download, but provide a clear fallback instruction if it fails (e.g., no network)
+            try:
+                import requests
+                url = self.model_urls[self.model_type]
+                logger.info(f"Downloading SAM {self.model_type} model...")
+                response = requests.get(url, stream=True, timeout=30)
+                response.raise_for_status()
+                with open(checkpoint_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                logger.info(f"Model downloaded to {checkpoint_path}")
+            except Exception as e:
+                raise RuntimeError(
+                    "Could not download SAM checkpoint. Place the weights at 'models/" 
+                    f"sam_{self.model_type}.pth' or install with extras. Error: {e}"
+                )
         
         return checkpoint_path
     
@@ -104,9 +104,16 @@ class ForestSAMProcessor:
         Args:
             checkpoint_path: Path to model checkpoint. If None, will download automatically.
         """
+        if not self.sam_available:
+            raise ImportError(
+                "segment_anything not available. Install extras '.[sam]' and ensure weights are present."
+            )
+
         if checkpoint_path is None:
-            checkpoint_path = self.download_model()
-            
+            # Prefer local file if present, otherwise attempt download
+            local_ckpt = Path("models") / f"sam_{self.model_type}.pth"
+            checkpoint_path = local_ckpt if local_ckpt.exists() else self.download_model()
+
         logger.info(f"Loading SAM model on {self.device}")
         self.sam = sam_model_registry[self.model_type](checkpoint=str(checkpoint_path))
         self.sam.to(device=self.device)

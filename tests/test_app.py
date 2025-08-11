@@ -45,22 +45,33 @@ class TestGhostForestDataManager(unittest.TestCase):
         self.assertEqual(result, {})
         
     def test_get_vegetation_health_stats(self):
-        """Test vegetation health statistics calculation"""
-        # Mock classification data with correct keys
+        """Test vegetation health statistics extraction from classification results"""
+        # Mock classification data in the shape produced by ForestSAMProcessor.classify_vegetation_health
         mock_classification = {
-            'healthy': np.array([[1, 1, 0], [0, 1, 1]]),
-            'stressed': np.array([[0, 0, 1], [1, 0, 0]]),
-            'declining': np.array([[0, 0, 0], [1, 0, 0]]),
-            'dead': np.array([[0, 0, 0], [0, 0, 0]])
+            'masks': {},
+            'statistics': {
+                'total_vegetation_pixels': 1000,
+                'healthy_pixels': 600,
+                'stressed_pixels': 250,
+                'declining_pixels': 100,
+                'dead_pixels': 50,
+                'healthy_percent': 60.0,
+                'stressed_percent': 25.0,
+                'declining_percent': 10.0,
+                'dead_percent': 5.0,
+            },
         }
-        
+
         stats = self.data_manager.get_vegetation_health_stats(mock_classification)
-        
+
         self.assertIsInstance(stats, dict)
         self.assertIn('healthy', stats)
         self.assertIn('stressed', stats)
         self.assertIn('declining', stats)
         self.assertIn('dead', stats)
+        # Basic sanity checks
+        self.assertEqual(stats['healthy']['pixels'], 600)
+        self.assertAlmostEqual(stats['dead']['percent'], 5.0)
         
     def test_run_sam_analysis_no_processor(self):
         """Test SAM analysis when processor is not available"""

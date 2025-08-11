@@ -2,8 +2,7 @@
 
 **AI-Powered Forest Recovery Monitoring After the East Troublesome Fire**
 
-![Project Status](https://img.shields.io/badge/Status-Stable-blue)
-![CI](https://img.shields.io/github/actions/workflow/status/yourusername/ghost-forest-watcher/ci.yml?label=CI)
+![Project Status](https://img.shields.io/badge/Status-Beta-yellow)
 ![Python Version](https://img.shields.io/badge/Python-3.11+-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.32+-red)
 
@@ -11,9 +10,9 @@
 
 ## 🎯 Project Overview
 
-Ghost Forest Watcher is a **stable, tested Streamlit application** that monitors forest recovery patterns following the 2020 East Troublesome Fire in Colorado. Using Sentinel-2 satellite imagery and Meta's Segment Anything Model (SAM), the application provides AI-powered analysis of vegetation health and recovery trends.
+Ghost Forest Watcher is a **Streamlit application** for visualizing forest recovery patterns following the 2020 East Troublesome Fire in Colorado. Using Sentinel-2 satellite imagery and optional AI segmentation (SAM), it demonstrates analysis of vegetation health and recovery trends.
 
-**Example results:** On a small sample area, analysis showed ~80.8% healthy recovery, ~15.6% stressed vegetation, and ~2.5% severely impacted areas. These figures are illustrative and depend on data and configuration.
+Note: Results shown are illustrative and depend on data, configuration, and model setup.
 
 ## Why it Matters
 
@@ -51,8 +50,7 @@ Western Colorado's forests are increasingly threatened by drought, bark beetle i
 
 ## Tech Stack
 
-- **Remote Sensing:** Sentinel-2 (GEE), rasterio, eo-learn
- - **Remote Sensing:** Sentinel-2 (GEE), rasterio
+- **Remote Sensing:** Sentinel-2 (GEE), rasterio
 - **AI Models:** SAM (Meta), MobileSAM, GroundingDINO
 - **Geospatial Engine:** Python, GeoPandas, DuckDB
 - **Web Map:** Streamlit
@@ -85,6 +83,15 @@ pip install -e .[dev]
 python main.py --port 8502        # Custom port
 python main.py --safe             # Safe mode (no AI)
 python main.py --test             # Run tests
+```
+
+### Pre-commit Hooks (recommended)
+Enable automatic formatting and lint checks before each commit:
+```bash
+pip install pre-commit
+pre-commit install
+# Optional: run on the whole repo once
+pre-commit run --all-files
 ```
 
 ### Data and model prerequisites
@@ -120,8 +127,8 @@ pytest -m integration
 ```
 
 - GitHub Actions
-  - CI runs unit tests on every push/PR
-  - To run integration tests in CI, trigger the workflow manually (Actions → CI → Run workflow) and set `run_integration=true`.
+  - CI is configured to run linting and unit tests
+  - Integration tests are optional and can be triggered manually
 
 ### 🌐 Access the Application
 - **Local URL**: http://localhost:8501
@@ -131,24 +138,19 @@ pytest -m integration
 ## 📊 Project Status
 
 ### ✅ **Current Capabilities**
-- **Fully Functional Web Application**: Stable Streamlit interface
-- **AI-Powered Analysis**: SAM-based vegetation segmentation working
-- **Data Pipeline**: GEE integration with pre-processed East Troublesome Fire data
-- **Interactive Visualization**: Multi-layer maps with export functionality
-- **🚀 Scalable Processing**: Handle full fire areas with intelligent tiling
-- **☁️ Cloud Processing**: Google Earth Engine integration for massive areas
-- **Automated Testing**: 15 unit tests + 3 integration tests currently passing
-- **Complete Documentation**: Technical guides, scaling solutions, and roadmaps
+- **Working Web Application**: Streamlit interface with multiple pages
+- **Optional AI Segmentation**: SAM-based analysis when dependencies and weights are installed
+- **Demo Data Pipeline**: Pre-processed tile included; GEE utilities provided for further work
+- **Interactive Visualization**: Folium/Plotly maps, stats, and exports
+- **Scaling Concepts**: Tiling and cloud-processing designs with example code
+- **CI & Tests**: Linting and unit tests configured; integration tests optional
 
-### 🎯 **Key Metrics & Scaling Capabilities**
-- **Current Study Area**: East Troublesome Fire region (823.6 km²)
-- **Maximum Scalable Area**: 2000+ km² with local tiling
-- **Cloud Processing**: Unlimited area size via Google Earth Engine
-- **Data Resolution**: 10m Sentinel-2 imagery
-- **Processing Speed**: 5-10 seconds current area, <2 hours for full East Troublesome Fire
-- **Memory Efficiency**: 8GB RAM maximum for any fire size
-- **Vegetation Health Results**: 80.8% healthy, 15.6% stressed, 2.5% impacted
-- **Test Coverage**: 100% success rate across all functional areas
+### 🎯 **Key Metrics & Scaling (illustrative)**
+- **Study Area**: East Troublesome Fire sample tile
+- **Resolution**: 10m Sentinel-2 imagery
+- **Local Scaling**: Tiling example targets memory-efficient processing
+- **Cloud Scaling**: GEE-based approach for larger areas
+These figures are targets or examples and not guarantees.
 
 ## 💡 Usage Guide
 
