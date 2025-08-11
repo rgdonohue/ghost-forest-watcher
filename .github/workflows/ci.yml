@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_integration:
+        description: "Run integration tests (starts Streamlit server)"
+        required: false
+        default: "false"
+
+jobs:
+  lint-and-unit-tests:
+    name: Lint and Unit Tests (skip integration)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev,sam]
+
+      - name: Run pytest (unit only)
+        run: |
+          pytest -m "not integration" -q
+
+  integration-tests:
+    name: Integration Tests (optional)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_integration == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      GF_RUN_INTEGRATION: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Start Streamlit (safe mode)
+        run: |
+          nohup python main.py --safe --port 8501 > streamlit.log 2>&1 &
+
+      - name: Wait for server
+        run: |
+          timeout 90 bash -c 'until curl -sf http://localhost:8501/_stcore/health > /dev/null; do sleep 3; done'
+
+      - name: Run integration tests
+        run: |
+          pytest -m integration -q
+
+      - name: Upload Streamlit log on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: streamlit-log
+          path: streamlit.log
+
+
