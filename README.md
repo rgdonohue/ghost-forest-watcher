@@ -5,15 +5,15 @@
 ![Project Status](https://img.shields.io/badge/Status-Stable-blue)
 ![CI](https://img.shields.io/github/actions/workflow/status/yourusername/ghost-forest-watcher/ci.yml?label=CI)
 ![Python Version](https://img.shields.io/badge/Python-3.11+-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.29+-red)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.32+-red)
 
 ---
 
 ## 🎯 Project Overview
 
-Ghost Forest Watcher is a **production-ready** web application that monitors forest recovery patterns following the 2020 East Troublesome Fire in Colorado. Using Sentinel-2 satellite imagery and Meta's Segment Anything Model (SAM), the application provides AI-powered analysis of vegetation health and recovery trends.
+Ghost Forest Watcher is a **stable, tested Streamlit application** that monitors forest recovery patterns following the 2020 East Troublesome Fire in Colorado. Using Sentinel-2 satellite imagery and Meta's Segment Anything Model (SAM), the application provides AI-powered analysis of vegetation health and recovery trends.
 
-**Key Results:** Analysis shows **80.8% healthy recovery**, **15.6% stressed vegetation**, and **2.5% severely impacted areas** in the study region.
+**Example results:** On a small sample area, analysis showed ~80.8% healthy recovery, ~15.6% stressed vegetation, and ~2.5% severely impacted areas. These figures are illustrative and depend on data and configuration.
 
 ## Why it Matters
 
@@ -42,7 +42,7 @@ Western Colorado's forests are increasingly threatened by drought, bark beetle i
 - **🚀 Aggregated Statistics**: Combined results from multiple processing tiles
 
 ### 🧪 **Quality Assurance & Scaling**
-- **100% Test Success Rate**: Complete test coverage with all tests passing
+- **Automated tests**: Unit and integration tests pass locally and in CI
 - **Error Handling**: Graceful degradation and user feedback
 - **Performance Optimization**: Efficient data loading and caching
 - **Cross-platform Compatibility**: Works on desktop and mobile
@@ -86,6 +86,16 @@ python main.py --safe             # Safe mode (no AI)
 python main.py --test             # Run tests
 ```
 
+### Data and model prerequisites
+
+- Large satellite data and SAM model weights are not bundled.
+- For a quick demo without data, you can enable a tiny synthetic dataset fallback:
+  ```bash
+  export GF_SYNTHETIC_FALLBACK=1
+  python main.py --safe
+  ```
+  This is for interface/demo purposes only.
+
 ### Option 3: Advanced Usage
 ```bash
 # Using the custom launcher script
@@ -120,13 +130,13 @@ pytest -m integration
 ## 📊 Project Status
 
 ### ✅ **Current Capabilities**
-- **Fully Functional Web Application**: Production-ready Streamlit interface
+- **Fully Functional Web Application**: Stable Streamlit interface
 - **AI-Powered Analysis**: SAM-based vegetation segmentation working
 - **Data Pipeline**: GEE integration with pre-processed East Troublesome Fire data
 - **Interactive Visualization**: Multi-layer maps with export functionality
 - **🚀 Scalable Processing**: Handle full fire areas with intelligent tiling
 - **☁️ Cloud Processing**: Google Earth Engine integration for massive areas
-- **Comprehensive Testing**: 100% test success rate (14/14 tests passing)
+- **Automated Testing**: 15 unit tests + 3 integration tests currently passing
 - **Complete Documentation**: Technical guides, scaling solutions, and roadmaps
 
 ### 🎯 **Key Metrics & Scaling Capabilities**
@@ -177,11 +187,11 @@ Ghost Forest Watcher includes comprehensive scaling solutions to handle fire are
 - **Global Data Access**: Direct access to Sentinel-2 imagery worldwide
 - **Production Ready**: Optimal for continuous monitoring systems
 
-### **📊 Scaling Performance**
+### **📊 Scaling Performance (illustrative)**
 
 | Fire Area | Local Processing | Cloud Processing | Memory Required |
 |-----------|------------------|------------------|-----------------|
-| 800 km² (Current) | 8 seconds | 30 minutes | 2GB |
+| 800 km² (Sample area) | seconds | ~30 minutes | ~2GB |
 | 784 km² (E. Troublesome) | 1.5 hours | 30 minutes | 8GB |
 | 835 km² (Cameron Peak) | 2.0 hours | 45 minutes | 8GB |
 | 1500+ km² (Large Fires) | 3.5 hours | 1.5 hours | 8GB |
