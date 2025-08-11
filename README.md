@@ -52,6 +52,7 @@ Western Colorado's forests are increasingly threatened by drought, bark beetle i
 ## Tech Stack
 
 - **Remote Sensing:** Sentinel-2 (GEE), rasterio, eo-learn
+ - **Remote Sensing:** Sentinel-2 (GEE), rasterio
 - **AI Models:** SAM (Meta), MobileSAM, GroundingDINO
 - **Geospatial Engine:** Python, GeoPandas, DuckDB
 - **Web Map:** Streamlit

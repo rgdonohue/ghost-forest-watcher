@@ -13,6 +13,6 @@ scikit-learn==1.4.2
 pillow==10.3.0
 requests==2.31.0
 
-# Optional extras (install via `pip install .[sam]` or `pip install .[gee]`)
-# SAM/ML: torch, torchvision, opencv-python, segment-anything
-# GEE: earthengine-api, google-api-python-client
+# Optional extras (install via `pip install '.[sam]'` or `pip install '.[gee]'`)
+# SAM/ML: torch, torchvision, opencv-python, segment-anything (pinned in setup.py extras)
+# GEE: earthengine-api, google-api-python-client (pinned in setup.py extras)
