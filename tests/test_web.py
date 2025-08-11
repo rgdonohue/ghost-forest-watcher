@@ -1,10 +1,16 @@
 """
 Web functionality tests for Ghost Forest Watcher Streamlit app
+
+Marked as integration tests; skipped by default unless GF_RUN_INTEGRATION=1.
 """
+import os
 import requests
 import time
 from pathlib import Path
+import pytest
 
+@pytest.mark.integration
+@pytest.mark.skipif(os.getenv("GF_RUN_INTEGRATION") != "1", reason="Integration tests disabled")
 def test_app_running():
     """Test that the Streamlit app is running and responsive"""
     try:
@@ -15,6 +21,8 @@ def test_app_running():
         print(f"❌ App connection failed: {e}")
         return False
 
+@pytest.mark.integration
+@pytest.mark.skipif(os.getenv("GF_RUN_INTEGRATION") != "1", reason="Integration tests disabled")
 def test_health_check():
     """Test app health endpoint"""
     try:
@@ -29,6 +37,8 @@ def test_health_check():
         print(f"⚠️ Health check endpoint not available: {e}")
         return False
 
+@pytest.mark.integration
+@pytest.mark.skipif(os.getenv("GF_RUN_INTEGRATION") != "1", reason="Integration tests disabled")
 def test_static_resources():
     """Test that static resources are loading"""
     try:

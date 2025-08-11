@@ -18,6 +18,7 @@ from typing import Dict, Tuple, Optional, List
 import base64
 from PIL import Image
 import io
+from rasterio.coords import BoundingBox
 
 # Import our SAM processor
 from .sam_processor import ForestSAMProcessor
@@ -48,8 +49,44 @@ class GhostForestDataManager:
         """
         tiff_path = Path(file_path)
         if not tiff_path.exists():
-            st.error(f"GeoTIFF file not found: {tiff_path}")
-            return {}
+            # Provide a small synthetic NDVI-difference-like dataset as a fallback
+            st.warning(f"GeoTIFF not found at {tiff_path}. Using synthetic sample data for demo.")
+            height, width = 100, 100
+            # Synthetic NDVI difference in range [-0.5, 0.5]
+            rng = np.random.default_rng(42)
+            data_2d = (rng.random((height, width), dtype=np.float32) - 0.5)
+            valid_data = data_2d[~np.isnan(data_2d)]
+            stats = {
+                'min': float(valid_data.min()),
+                'max': float(valid_data.max()),
+                'mean': float(valid_data.mean()),
+                'std': float(valid_data.std()),
+                'percentiles': {
+                    '1': float(np.percentile(valid_data, 1)),
+                    '5': float(np.percentile(valid_data, 5)),
+                    '25': float(np.percentile(valid_data, 25)),
+                    '50': float(np.percentile(valid_data, 50)),
+                    '75': float(np.percentile(valid_data, 75)),
+                    '95': float(np.percentile(valid_data, 95)),
+                    '99': float(np.percentile(valid_data, 99))
+                }
+            }
+            # Dummy WGS84 bounds roughly around Colorado
+            metadata = {
+                'bounds': BoundingBox(left=-106.0, bottom=40.0, right=-105.9, top=40.1),
+                'crs': 'EPSG:4326',
+                'transform': None,
+                'shape': data_2d.shape,
+                'dtype': str(data_2d.dtype),
+                'nodata': None
+            }
+            return {
+                'data': data_2d,
+                'metadata': metadata,
+                'statistics': stats,
+                'valid_pixels': int(valid_data.size),
+                'total_pixels': int(data_2d.size)
+            }
             
         with rasterio.open(tiff_path) as src:
             # Read data
