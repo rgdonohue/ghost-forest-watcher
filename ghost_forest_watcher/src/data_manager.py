@@ -3,6 +3,7 @@ Data Management Layer for Ghost Forest Watcher Streamlit App
 Handles loading, caching, and processing of geospatial data and analysis results
 """
 import streamlit as st
+import os
 import numpy as np
 import pandas as pd
 import rasterio
@@ -50,6 +51,9 @@ class GhostForestDataManager:
         tiff_path = Path(file_path)
         if not tiff_path.exists():
             # Provide a small synthetic NDVI-difference-like dataset as a fallback
+            if os.getenv("GF_SYNTHETIC_FALLBACK") != "1":
+                st.error(f"GeoTIFF file not found: {tiff_path}")
+                return {}
             st.warning(f"GeoTIFF not found at {tiff_path}. Using synthetic sample data for demo.")
             height, width = 100, 100
             # Synthetic NDVI difference in range [-0.5, 0.5]
