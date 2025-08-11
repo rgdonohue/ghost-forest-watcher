@@ -1,0 +1,12 @@
+- Fix setup.py entry point and remove duplicate page functions in app.py.
+- Refactor scalable_processor multiprocessing to avoid pickling self and torch objects; use a top-level worker and as_completed.
+- Pin dependencies; split extras:
+  - Core: streamlit, numpy, pandas, rasterio, folium, plotly.
+  - sam: torch==<pinned>, segment-anything==<pinned or commit>, opencv-python.
+  - gee: earthengine-api.
+- Make web tests optional/marked integration (skip by default) or add a test fixture that boots the app in the background for the test run.
+- Add a tiny sample dataset or a robust mock path so the app always loads without hidden assets.
+- Remove or fix lazy_imports.py (correct module path or delete if unused).
+- Add CI (format, lint, unit tests) and a minimal smoke test that doesn’t require the full model/data.
+- Replace private Streamlit config calls with documented alternatives (or guard them tightly and accept best-effort).
+- Improve GEE routines to avoid .getInfo() loops and note quota considerations in docs.

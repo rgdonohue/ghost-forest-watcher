@@ -56,7 +56,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "ghost-forest-watcher=scripts.run_app:main",
+            "ghost-forest-watcher=scripts.run_app:run_streamlit",
         ],
     },
     include_package_data=True,
