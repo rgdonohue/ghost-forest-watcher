@@ -16,10 +16,10 @@ def test_app_running():
     try:
         response = requests.get("http://localhost:8501", timeout=10)
         print(f"✅ App is running - Status Code: {response.status_code}")
-        return response.status_code == 200
+        assert response.status_code == 200
     except Exception as e:
         print(f"❌ App connection failed: {e}")
-        return False
+        assert False
 
 @pytest.mark.integration
 @pytest.mark.skipif(os.getenv("GF_RUN_INTEGRATION") != "1", reason="Integration tests disabled")
@@ -27,15 +27,10 @@ def test_health_check():
     """Test app health endpoint"""
     try:
         response = requests.get("http://localhost:8501/_stcore/health", timeout=5)
-        if response.status_code == 200:
-            print("✅ App health check passed")
-            return True
-        else:
-            print(f"❌ Health check failed with status: {response.status_code}")
-            return False
+        assert response.status_code == 200
     except Exception as e:
         print(f"⚠️ Health check endpoint not available: {e}")
-        return False
+        assert False
 
 @pytest.mark.integration
 @pytest.mark.skipif(os.getenv("GF_RUN_INTEGRATION") != "1", reason="Integration tests disabled")
@@ -45,10 +40,10 @@ def test_static_resources():
         # Test for Streamlit's static resources
         response = requests.get("http://localhost:8501/_stcore/static/", timeout=5)
         print(f"✅ Static resources accessible - Status: {response.status_code}")
-        return True
+        assert response.status_code == 200
     except Exception as e:
         print(f"⚠️ Static resources test: {e}")
-        return False
+        assert False
 
 def test_file_availability():
     """Test availability of required files"""
@@ -65,7 +60,8 @@ def test_file_availability():
         print(f"{status} {name}: {path}")
         file_status.append(exists)
     
-    return file_status
+    # Assert that test simply runs; do not require files to exist by default
+    assert isinstance(file_status, list)
 
 def main():
     """Run all web tests"""

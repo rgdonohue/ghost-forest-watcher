@@ -32,11 +32,12 @@ def run_streamlit():
     setup_environment()
     
     # Default arguments
+    server_address = os.getenv('GFW_BIND_ADDRESS', 'localhost')
     args = [
         'streamlit', 'run', 'ghost_forest_watcher/app.py',
         '--server.headless', 'false',
         '--server.port', '8501',
-        '--server.address', '0.0.0.0',
+        '--server.address', server_address,
         '--browser.serverAddress', 'localhost',
         '--browser.gatherUsageStats', 'false'
     ]
