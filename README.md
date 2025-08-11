@@ -2,8 +2,8 @@
 
 **AI-Powered Forest Recovery Monitoring After the East Troublesome Fire**
 
-![Project Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
-![Test Coverage](https://img.shields.io/badge/Test%20Coverage-100%25-brightgreen)
+![Project Status](https://img.shields.io/badge/Status-Stable-blue)
+![CI](https://img.shields.io/github/actions/workflow/status/yourusername/ghost-forest-watcher/ci.yml?label=CI)
 ![Python Version](https://img.shields.io/badge/Python-3.11+-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.29+-red)
 
@@ -78,7 +78,7 @@ python main.py
 ### Option 2: Development Setup
 ```bash
 # Install with development dependencies
-make dev-install
+pip install -e .[dev]
 
 # Run with various options
 python main.py --port 8502        # Custom port
@@ -94,6 +94,23 @@ python scripts/run_app.py
 # Direct Streamlit execution
 streamlit run ghost_forest_watcher/app.py
 ```
+
+### CI and Tests
+
+- Run unit tests locally (skipping integration by default):
+```bash
+pytest -m "not integration"
+```
+
+- Run integration tests (requires a running Streamlit server or let the test start one):
+```bash
+export GF_RUN_INTEGRATION=1
+pytest -m integration
+```
+
+- GitHub Actions
+  - CI runs unit tests on every push/PR
+  - To run integration tests in CI, trigger the workflow manually (Actions → CI → Run workflow) and set `run_integration=true`.
 
 ### 🌐 Access the Application
 - **Local URL**: http://localhost:8501
