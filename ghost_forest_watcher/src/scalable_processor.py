@@ -9,13 +9,122 @@ from pathlib import Path
 import json
 from typing import Dict, List, Tuple, Generator
 import logging
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 import psutil
 import math
 from dataclasses import dataclass
 from tqdm import tqdm
 
 from .sam_processor import ForestSAMProcessor
+
+# =====================
+# Top-level worker API
+# =====================
+
+_GLOBAL_SAM_PROCESSOR = None
+
+def _init_worker(model_type: str = "vit_b") -> None:
+    """Initializer for worker processes to create a local SAM processor.
+
+    Avoids pickling model objects by instantiating per-process.
+    """
+    global _GLOBAL_SAM_PROCESSOR
+    _GLOBAL_SAM_PROCESSOR = ForestSAMProcessor(model_type=model_type)
+    _GLOBAL_SAM_PROCESSOR.load_model()
+
+
+def _process_tile_worker(
+    input_path: str,
+    output_dir: str,
+    tile_job: Dict,
+) -> Dict:
+    """Process a single tile in a separate process.
+
+    Args:
+        input_path: Path to input GeoTIFF (string for pickling ease)
+        output_dir: Base output directory (string)
+        tile_job: Serializable dict describing the tile window and metadata
+
+    Returns:
+        Result dictionary similar to the previous implementation
+    """
+    try:
+        # Re-open dataset in worker
+        with rasterio.open(input_path) as src:
+            # Reconstruct window
+            col_off, row_off, width, height = tile_job["window"]
+            window = Window(col_off, row_off, width, height)
+
+            tile_data = src.read(window=window)
+            tile_transform = rasterio.windows.transform(window, src.transform)
+
+            tile_profile = src.profile.copy()
+            tile_profile.update(
+                {
+                    "height": window.height,
+                    "width": window.width,
+                    "transform": tile_transform,
+                }
+            )
+
+        # Use per-process SAM processor
+        if _GLOBAL_SAM_PROCESSOR is None:
+            # Fallback: initialize lazily if initializer wasn't used
+            _init_worker("vit_b")
+
+        rgb_image = _GLOBAL_SAM_PROCESSOR.ndvi_to_rgb(tile_data)
+        if rgb_image is None:
+            return {"tile_id": tile_job["id"], "status": "failed", "error": "RGB conversion failed"}
+
+        segmentation_results = _GLOBAL_SAM_PROCESSOR.segment_forest_areas(rgb_image)
+        classification_results = _GLOBAL_SAM_PROCESSOR.classify_vegetation_health(
+            tile_data, segmentation_results
+        )
+
+        # Save artifacts
+        tile_output_dir = Path(output_dir) / f"tile_{tile_job['id']:04d}"
+        tile_output_dir.mkdir(exist_ok=True, parents=True)
+
+        # Write NDVI tile
+        with rasterio.open(tile_output_dir / "ndvi_data.tif", "w", **tile_profile) as dst:
+            dst.write(tile_data)
+
+        # Write masks as single-band uint8 rasters
+        for mask_name, mask_data in classification_results["masks"].items():
+            mask_profile = tile_profile.copy()
+            mask_profile.update({"dtype": "uint8", "count": 1})
+            with rasterio.open(tile_output_dir / f"{mask_name}_mask.tif", "w", **mask_profile) as dst:
+                dst.write(mask_data.astype(np.uint8), 1)
+
+        # Save statistics
+        stats_file = tile_output_dir / "statistics.json"
+        with open(stats_file, "w") as f:
+            json.dump(
+                {
+                    "tile_id": tile_job["id"],
+                    "bounds": tile_job["bounds"],
+                    "area_km2": tile_job["area_km2"],
+                    "statistics": classification_results["statistics"],
+                    "processing_status": "completed",
+                },
+                f,
+                indent=2,
+            )
+
+        return {
+            "tile_id": tile_job["id"],
+            "status": "completed",
+            "statistics": classification_results["statistics"],
+            "area_km2": tile_job["area_km2"],
+            "output_dir": str(tile_output_dir),
+        }
+
+    except Exception as exc:  # pragma: no cover - defensive
+        return {
+            "tile_id": tile_job.get("id"),
+            "status": "failed",
+            "error": str(exc),
+        }
 
 @dataclass
 class TileInfo:
@@ -277,40 +386,58 @@ class ScalableForestProcessor:
         
         self.logger.info(f"Processing {len(tiles)} tiles with {max_workers} workers")
         
-        # Process tiles in parallel
-        results = []
+        # Build serializable jobs
+        jobs: List[Dict] = []
+        for tile in tiles:
+            jobs.append(
+                {
+                    "id": tile.id,
+                    "window": (
+                        int(tile.window.col_off),
+                        int(tile.window.row_off),
+                        int(tile.window.width),
+                        int(tile.window.height),
+                    ),
+                    "bounds": tile.bounds,
+                    "area_km2": tile.area_km2,
+                }
+            )
+
+        # Process tiles in parallel using per-process SAM instances
+        results: List[Dict] = []
         completed_tiles = 0
         failed_tiles = 0
-        
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all tasks
-            future_to_tile = {
-                executor.submit(self.process_tile, input_path, tile, output_dir): tile
-                for tile in tiles
-            }
-            
-            # Process results with progress bar
-            with tqdm(total=len(tiles), desc="Processing tiles") as pbar:
-                for future in future_to_tile:
+
+        with ProcessPoolExecutor(
+            max_workers=max_workers,
+            initializer=_init_worker,
+            initargs=("vit_b",),
+        ) as executor:
+            futures = [
+                executor.submit(
+                    _process_tile_worker,
+                    str(input_path),
+                    str(output_dir),
+                    job,
+                )
+                for job in jobs
+            ]
+
+            with tqdm(total=len(futures), desc="Processing tiles") as pbar:
+                for future in as_completed(futures):
                     try:
-                        result = future.result(timeout=300)  # 5 minute timeout per tile
+                        result = future.result(timeout=300)
                         results.append(result)
-                        
-                        if result['status'] == 'completed':
+                        if result.get("status") == "completed":
                             completed_tiles += 1
                         else:
                             failed_tiles += 1
-                            
-                        pbar.update(1)
-                        pbar.set_postfix({
-                            'Completed': completed_tiles,
-                            'Failed': failed_tiles
-                        })
-                        
-                    except Exception as e:
+                    except Exception as e:  # pragma: no cover - defensive
                         self.logger.error(f"Tile processing failed: {e}")
                         failed_tiles += 1
+                    finally:
                         pbar.update(1)
+                        pbar.set_postfix({"Completed": completed_tiles, "Failed": failed_tiles})
         
         # Aggregate results
         total_area = sum(r.get('area_km2', 0) for r in results if r['status'] == 'completed')

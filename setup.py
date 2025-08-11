@@ -42,6 +42,32 @@ setup(
     python_requires=">=3.9",
     install_requires=requirements,
     extras_require={
+        "core": [
+            "streamlit==1.32.2",
+            "streamlit-folium==0.20.0",
+            "folium==0.15.1",
+            "geopandas==0.14.3",
+            "duckdb==0.10.2",
+            "rasterio==1.3.9",
+            "plotly==5.22.0",
+            "numpy==1.26.4",
+            "pandas==2.2.2",
+            "matplotlib==3.8.3",
+            "scikit-image==0.22.0",
+            "scikit-learn==1.4.2",
+            "pillow==10.3.0",
+            "requests==2.31.0",
+        ],
+        "sam": [
+            "torch==2.2.2",
+            "torchvision==0.17.2",
+            "opencv-python==4.9.0.80",
+            "segment-anything @ git+https://github.com/facebookresearch/segment-anything.git@01ec64",
+        ],
+        "gee": [
+            "earthengine-api==0.1.395",
+            "google-api-python-client==2.125.0",
+        ],
         "dev": [
             "pytest>=7.0",
             "pytest-cov>=4.0",
